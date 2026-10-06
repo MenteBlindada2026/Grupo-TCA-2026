@@ -9,6 +9,7 @@ const state = {
   memoryFlipped: [],
   memoryMatched: [],
   moves: 0,
+  gameXp: 0,
 };
 
 const STORAGE_KEY = 'rumoData';
@@ -26,18 +27,191 @@ const goalProgressBar = document.getElementById('goalProgressBar');
 const dailyGoalText = document.getElementById('dailyGoalText');
 const memoryGame = document.getElementById('memoryGame');
 const movesCount = document.getElementById('movesCount');
+const memoryFeedback = document.getElementById('memoryFeedback');
 const brainQuestion = document.getElementById('brainQuestion');
 const brainFeedback = document.getElementById('brainFeedback');
 const numberGame = document.getElementById('numberGame');
 const numberFeedback = document.getElementById('numberFeedback');
 const wordGame = document.getElementById('wordGame');
 const wordFeedback = document.getElementById('wordFeedback');
+const gameXp = document.getElementById('gameXp');
+const gameLevel = document.getElementById('gameLevel');
+const gameXpBar = document.getElementById('gameXpBar');
+const gameXpHint = document.getElementById('gameXpHint');
+
+function setupAccessGate() {
+  const gate = document.getElementById('accessGate');
+  const form = document.getElementById('accessForm');
+  const input = document.getElementById('profileName');
+  const dataConsent = document.getElementById('dataConsent');
+  const error = document.getElementById('accessError');
+  const greeting = document.getElementById('profileGreeting');
+  const assessmentGreeting = document.getElementById('assessmentGreeting');
+  const signOut = document.getElementById('signOut');
+  const askNameForResearch = document.body.classList.contains('research-page');
+  const surveyCodeCard = document.getElementById('surveyCodeCard');
+  const surveyCodeValue = document.getElementById('surveyCodeValue');
+  const copySurveyCode = document.getElementById('copySurveyCode');
+  if (!gate || !form || !input || !error) return;
+
+  const enterSite = (name) => {
+    document.body.dataset.accessGranted = 'true';
+    gate.hidden = true;
+    document.querySelectorAll('.topbar, main').forEach((element) => {
+      element.inert = false;
+    });
+    if (greeting) greeting.textContent = `Olá, ${name}!`;
+    if (assessmentGreeting) {
+      assessmentGreeting.textContent = `Olá, ${name}! Vamos começar sua pesquisa?`;
+      assessmentGreeting.classList.remove('hidden');
+    }
+    if (askNameForResearch && surveyCodeCard && surveyCodeValue) {
+      const surveyCode = localStorage.getItem('rumoSurveyCode');
+      if (surveyCode) {
+        surveyCodeValue.textContent = surveyCode;
+        surveyCodeCard.classList.remove('hidden');
+      }
+    }
+  };
+
+  document.querySelectorAll('.topbar, main').forEach((element) => {
+    element.inert = true;
+  });
+
+  try {
+    const savedName = localStorage.getItem('rumoProfileName');
+    if (savedName && !askNameForResearch) enterSite(savedName);
+  } catch {
+    error.textContent = 'Não foi possível acessar o armazenamento local. Ative o armazenamento do navegador e tente novamente.';
+  }
+
+  form.addEventListener('submit', async (event) => {
+    event.preventDefault();
+    const name = input.value.trim();
+    if (name.length < 2) {
+      error.textContent = 'Digite um nome com pelo menos duas letras.';
+      input.focus();
+      return;
+    }
+
+    if (askNameForResearch) {
+      if (!dataConsent.checked) {
+        error.textContent = 'Confirme que entendeu onde as respostas serão armazenadas.';
+        dataConsent.focus();
+        return;
+      }
+
+      const submitButton = form.querySelector('button[type="submit"]');
+      submitButton.disabled = true;
+      error.textContent = 'Preparando seu código individual...';
+      try {
+        let clientId = localStorage.getItem('rumoSurveyClientId');
+        if (!clientId) {
+          clientId = crypto.randomUUID().toUpperCase();
+          localStorage.setItem('rumoSurveyClientId', clientId);
+        }
+
+        let inviteCode = localStorage.getItem('rumoSurveyCode');
+        if (!inviteCode) {
+          const registration = await fetch('/api/survey/register', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ clientId })
+          });
+          const registrationResult = await registration.json();
+          if (!registration.ok) {
+            error.textContent = registration.status === 409
+              ? 'Este navegador já recebeu um código, mas o código salvo foi apagado. Recarregue uma cópia de segurança do código ou peça ajuda à pessoa responsável.'
+              : registration.status === 429
+                ? registrationResult.error || 'Muitas tentativas de criar códigos. Tente mais tarde.'
+              : registrationResult.error || 'Não foi possível criar seu código.';
+            return;
+          }
+          inviteCode = registrationResult.code;
+          localStorage.setItem('rumoSurveyCode', inviteCode);
+        }
+
+        const response = await fetch('/api/survey/access', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ code: inviteCode })
+        });
+        const result = await response.json();
+        if (!response.ok) {
+          if (response.status === 409) {
+            localStorage.setItem('rumoProfileName', name);
+            enterSite(name);
+            const completeMessage = document.querySelector('#assessmentComplete p');
+            completeMessage.textContent = 'Este código já foi usado para responder. A pesquisa não pode ser enviada novamente.';
+            document.getElementById('assessmentForm').classList.add('hidden');
+            document.getElementById('assessmentComplete').classList.remove('hidden');
+            return;
+          }
+          error.textContent = response.status === 404
+            ? 'Código não encontrado. Confira o código ou peça ajuda à pessoa responsável.'
+            : result.error || 'Não foi possível verificar o código.';
+          return;
+        }
+
+        localStorage.setItem('rumoProfileName', name);
+        error.textContent = '';
+        enterSite(name);
+      } catch {
+        error.textContent = 'Não foi possível conectar ao servidor. Abra o site pelo endereço do servidor e tente novamente.';
+      } finally {
+        submitButton.disabled = false;
+      }
+      return;
+    }
+
+    try {
+      localStorage.setItem('rumoProfileName', name);
+      error.textContent = '';
+      enterSite(name);
+    } catch {
+      error.textContent = 'Não foi possível salvar seu nome neste dispositivo. Verifique as configurações de armazenamento do navegador.';
+    }
+  });
+
+  if (signOut) {
+    signOut.addEventListener('click', () => {
+      try {
+        localStorage.removeItem('rumoProfileName');
+        document.body.dataset.accessGranted = 'false';
+        gate.hidden = false;
+        document.querySelectorAll('.topbar, main').forEach((element) => {
+          element.inert = true;
+        });
+        if (greeting) greeting.textContent = '';
+        input.value = '';
+        input.focus();
+      } catch {
+        error.textContent = 'Não foi possível encerrar a sessão local. Verifique as configurações do navegador.';
+      }
+    });
+  }
+
+  if (copySurveyCode && surveyCodeValue) {
+    copySurveyCode.addEventListener('click', async () => {
+      try {
+        await navigator.clipboard.writeText(surveyCodeValue.textContent);
+        copySurveyCode.textContent = 'Código copiado!';
+        window.setTimeout(() => {
+          copySurveyCode.textContent = 'Copiar código';
+        }, 1800);
+      } catch {
+        error.textContent = 'Não foi possível copiar automaticamente. Selecione e copie o código exibido.';
+      }
+    });
+  }
+}
 
 function saveData() {
   const data = {
     theme: state.theme,
     checkins: state.checkins,
-    assessments: state.assessments
+    assessments: state.assessments,
+    gameXp: state.gameXp
   };
   localStorage.setItem(STORAGE_KEY, JSON.stringify(data));
 }
@@ -46,9 +220,9 @@ function setTheme(theme) {
   document.body.dataset.theme = theme;
   state.theme = theme;
   const isDark = theme === 'dark';
-  themeLabel.textContent = isDark ? 'Modo escuro' : 'Modo claro';
-  themeIcon.textContent = isDark ? '☾' : '☀';
-  themeToggle.setAttribute('aria-label', isDark ? 'Ativar modo claro' : 'Ativar modo escuro');
+  if (themeLabel) themeLabel.textContent = isDark ? 'Modo escuro' : 'Modo claro';
+  if (themeIcon) themeIcon.textContent = isDark ? '☾' : '☀';
+  if (themeToggle) themeToggle.setAttribute('aria-label', isDark ? 'Ativar modo claro' : 'Ativar modo escuro');
 }
 
 function loadData() {
@@ -61,14 +235,35 @@ function loadData() {
     state.theme = savedData.theme || oldSettings.theme || 'dark';
     state.checkins = Array.isArray(savedData.checkins) ? savedData.checkins : oldCheckins;
     state.assessments = Array.isArray(savedData.assessments) ? savedData.assessments : oldAssessments;
+    state.gameXp = Number.isFinite(Number(savedData.gameXp)) ? Number(savedData.gameXp) : 0;
   } catch {
     state.theme = 'dark';
     state.checkins = [];
     state.assessments = [];
+    state.gameXp = 0;
   }
 
   setTheme(state.theme);
   saveData();
+  updateGameProgress();
+}
+
+function updateGameProgress() {
+  if (!gameXp || !gameLevel || !gameXpBar || !gameXpHint) return;
+
+  const level = Math.floor(state.gameXp / 100) + 1;
+  const progress = state.gameXp % 100;
+  gameXp.textContent = String(state.gameXp);
+  gameLevel.textContent = String(level);
+  gameXpBar.style.width = `${progress}%`;
+  gameXpBar.parentElement.setAttribute('aria-valuenow', String(progress));
+  gameXpHint.textContent = `Mais ${100 - progress} XP para o próximo nível. Seu progresso fica salvo neste dispositivo.`;
+}
+
+function awardGameXp(points) {
+  state.gameXp += points;
+  saveData();
+  updateGameProgress();
 }
 
 function formatDate(dateString) {
@@ -157,15 +352,18 @@ function renderCheckinCard() {
 }
 
 function updateMetaProgress() {
+  if (!goalProgressBar || !dailyGoalText) return;
+
   const checkins = state.checkins.filter((entry) => Number(entry.smoked_today) === 0);
   const progress = Math.min(Math.round((checkins.length / 7) * 100), 100);
   goalProgressBar.style.width = `${progress}%`;
   dailyGoalText.textContent = `${progress}% da meta`;
+  goalProgressBar.parentElement.setAttribute('aria-valuenow', String(progress));
 }
 
 function loadCheckins() {
-  renderCalendar();
-  renderCheckinCard();
+  if (calendarGrid) renderCalendar();
+  if (selectedDateLabel && checkinResponse) renderCheckinCard();
   updateMetaProgress();
 }
 
@@ -198,7 +396,9 @@ function saveCheckin(smokedToday) {
 }
 
 function setupAssessment() {
-  assessmentForm.addEventListener('submit', (event) => {
+  if (!assessmentForm) return;
+
+  assessmentForm.addEventListener('submit', async (event) => {
     event.preventDefault();
 
     const answers = {};
@@ -233,27 +433,57 @@ function setupAssessment() {
           ? 'Você está com sinais moderados. Acompanhe sua rotina e procure conversas abertas com alguém de confiança.'
           : 'Seu quadro parece mais estável neste momento; continue com hábitos saudáveis e atenção aos sinais do dia a dia.';
 
-    assessmentMessage.textContent = `${message} Nível: ${level}.`;
+    const inviteCode = localStorage.getItem('rumoSurveyCode');
+    if (!inviteCode) {
+      assessmentMessage.textContent = 'Sua sessão da pesquisa expirou. Recarregue a página e confira seu código individual.';
+      assessmentResult.classList.remove('hidden');
+      return;
+    }
+
+    const submitButton = assessmentForm.querySelector('button[type="submit"]');
+    submitButton.disabled = true;
+    assessmentMessage.textContent = 'Salvando sua pesquisa...';
     assessmentResult.classList.remove('hidden');
 
-    state.assessments.unshift({
-      score,
-      level,
-      answers,
-      createdAt: new Date().toISOString()
-    });
-    state.assessments = state.assessments.slice(0, 10);
-    saveData();
+    try {
+      const response = await fetch('/api/survey/submit', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          code: inviteCode,
+          answers: Object.fromEntries(Object.entries(answers).map(([key, value]) => [key, Number(value)]))
+        })
+      });
+      const result = await response.json();
+      if (!response.ok) {
+        assessmentMessage.textContent = response.status === 409
+          ? 'Este código já foi usado. Cada pessoa pode responder à pesquisa uma única vez.'
+          : result.error || 'Não foi possível salvar sua pesquisa.';
+        submitButton.disabled = response.status === 409;
+        return;
+      }
+
+      assessmentMessage.textContent = `${message} Nível: ${level}.`;
+      assessmentResult.classList.add('hidden');
+      assessmentForm.classList.add('hidden');
+      document.getElementById('assessmentComplete').classList.remove('hidden');
+    } catch {
+      assessmentMessage.textContent = 'Não foi possível conectar ao servidor. Sua pesquisa não foi registrada; verifique a conexão e tente novamente.';
+      submitButton.disabled = false;
+    }
   });
 }
 
 function initMemoryGame() {
+  if (!memoryGame || !movesCount) return;
+
   const icons = ['🌱', '🧠', '💪', '🌊', '🚭', '💙'];
   state.memoryCards = [...icons, ...icons].sort(() => Math.random() - 0.5);
   state.memoryFlipped = [];
   state.memoryMatched = [];
   state.moves = 0;
   movesCount.textContent = '0';
+  if (memoryFeedback) memoryFeedback.textContent = 'Vire duas cartas para começar!';
   memoryGame.innerHTML = '';
 
   state.memoryCards.forEach((icon, index) => {
@@ -292,8 +522,11 @@ function handleMemoryClick(card, icon) {
         first.classList.add('matched');
         second.classList.add('matched');
         state.memoryFlipped = [];
+        awardGameXp(15);
+        if (memoryFeedback) memoryFeedback.textContent = 'Par encontrado! +15 XP ✨';
         if (state.memoryMatched.length === state.memoryCards.length) {
-          brainFeedback.textContent = 'Parabéns! Você venceu o jogo mental e manteve o foco.';
+          awardGameXp(25);
+          if (memoryFeedback) memoryFeedback.textContent = `Você encontrou todos os pares em ${state.moves} jogadas! Bônus +25 XP 🏆`;
         }
       }, 400);
     } else {
@@ -303,23 +536,40 @@ function handleMemoryClick(card, icon) {
         first.classList.remove('flipped');
         second.classList.remove('flipped');
         state.memoryFlipped = [];
+        if (memoryFeedback) memoryFeedback.textContent = 'Sem par desta vez. Tente outra combinação!';
       }, 600);
     }
   }
 }
 
 function setupBrainChallenge() {
+  if (!brainFeedback) return;
+
+  let completed = false;
   document.querySelectorAll('.brain-option').forEach((button) => {
     button.addEventListener('click', () => {
       const answer = button.dataset.answer === '1';
-      brainFeedback.textContent = answer
-        ? 'Correto! Foco é uma escolha diária que fortalece a mente.'
-        : 'Tente novamente. A resposta certa é “foco”.';
+      if (completed) return;
+
+      if (answer) {
+        completed = true;
+        awardGameXp(10);
+        brainFeedback.textContent = 'Mandou bem! Foco é uma escolha diária. +10 XP 🎉';
+        document.querySelectorAll('.brain-option').forEach((option) => {
+          option.disabled = true;
+        });
+      } else {
+        brainFeedback.textContent = 'Quase! Respire e tente outra resposta.';
+        button.classList.add('wrong-answer');
+        setTimeout(() => button.classList.remove('wrong-answer'), 450);
+      }
     });
   });
 }
 
 function setupNumberGame() {
+  if (!numberGame || !numberFeedback) return;
+
   const sequence = [3, 7, 2, 9];
   const options = [3, 7, 2, 9, 5];
   let current = 0;
@@ -336,14 +586,23 @@ function setupNumberGame() {
     button.addEventListener('click', () => {
       if (option === sequence[current]) {
         button.classList.add('correct');
+        button.disabled = true;
         current += 1;
+        awardGameXp(5);
         numberFeedback.textContent = `${current} de ${sequence.length} correto${current === sequence.length ? '!' : ''}`;
         if (current === sequence.length) {
-          numberFeedback.textContent = 'Ordem concluída! Você treinou seu raciocínio.';
+          numberFeedback.textContent = 'Sequência completa! Raciocínio afiado. +20 XP no total 🏆';
+          optionContainer.querySelectorAll('button').forEach((item) => {
+            item.disabled = true;
+          });
         }
       } else {
         numberFeedback.textContent = 'Não é esse número. Tente novamente.';
         current = 0;
+        optionContainer.querySelectorAll('button').forEach((item) => {
+          item.disabled = false;
+          item.classList.remove('correct');
+        });
       }
     });
     optionContainer.appendChild(button);
@@ -351,6 +610,8 @@ function setupNumberGame() {
 }
 
 function setupWordGame() {
+  if (!wordGame || !wordFeedback) return;
+
   const word = { scrambled: 'HONOS', answer: 'SONHO' };
   const options = ['SONHO', 'HOSNO', 'HONOS', 'NOHOS'];
 
@@ -365,17 +626,151 @@ function setupWordGame() {
     button.textContent = option;
     button.addEventListener('click', () => {
       const correct = option === word.answer;
-      button.classList.toggle('correct', correct);
-      wordFeedback.textContent = correct
-        ? 'Correto! A palavra é “SONHO”.'
-        : 'Tente novamente. A palavra correta é “SONHO”.';
+      if (correct) {
+        awardGameXp(20);
+        button.classList.add('correct');
+        wordFeedback.textContent = 'Acertou! A palavra é SONHO. +20 XP 🎉';
+        optionContainer.querySelectorAll('button').forEach((item) => {
+          item.disabled = true;
+        });
+      } else {
+        wordFeedback.textContent = 'Não foi dessa vez. Observe as letras e tente outra opção!';
+        button.classList.add('wrong-answer');
+        setTimeout(() => button.classList.remove('wrong-answer'), 450);
+      }
     });
     optionContainer.appendChild(button);
   });
 }
 
+function setupClickGame() {
+  const target = document.getElementById('clickTarget');
+  const start = document.getElementById('clickStart');
+  const scoreLabel = document.getElementById('clickScore');
+  const feedback = document.getElementById('clickFeedback');
+  if (!target || !start || !scoreLabel || !feedback) return;
+
+  let score = 0;
+  let timeLeft = 15;
+  let timer;
+  const placeTarget = () => {
+    target.style.left = `${Math.round(Math.random() * 75)}%`;
+    target.style.top = `${Math.round(Math.random() * 70)}%`;
+  };
+
+  start.addEventListener('click', () => {
+    clearInterval(timer);
+    score = 0;
+    timeLeft = 15;
+    scoreLabel.textContent = '0';
+    feedback.textContent = 'Vai! Encontre as estrelas!';
+    target.disabled = false;
+    start.disabled = true;
+    placeTarget();
+    timer = setInterval(() => {
+      timeLeft -= 1;
+      if (timeLeft <= 0) {
+        clearInterval(timer);
+        target.disabled = true;
+        start.disabled = false;
+        feedback.textContent = `Tempo! Você encontrou ${score} ${score === 1 ? 'estrela' : 'estrelas'}.`;
+        return;
+      }
+      feedback.textContent = `${timeLeft} segundos restantes — continue!`;
+    }, 1000);
+  });
+
+  target.addEventListener('click', () => {
+    if (target.disabled) return;
+    score += 1;
+    scoreLabel.textContent = String(score);
+    feedback.textContent = `Boa! ${score} ${score === 1 ? 'estrela' : 'estrelas'} — restam ${timeLeft} segundos!`;
+    awardGameXp(3);
+    placeTarget();
+    target.classList.remove('target-pop');
+    void target.offsetWidth;
+    target.classList.add('target-pop');
+  });
+}
+
+function setupMathGame() {
+  const question = document.getElementById('mathQuestion');
+  const options = document.getElementById('mathOptions');
+  const roundLabel = document.getElementById('mathRound');
+  const start = document.getElementById('mathStart');
+  const feedback = document.getElementById('mathFeedback');
+  if (!question || !options || !roundLabel || !start || !feedback) return;
+
+  let round = 0;
+  let answer = 0;
+  let running = false;
+
+  const nextQuestion = () => {
+    if (round >= 5) {
+      running = false;
+      question.textContent = 'Desafio concluído! Mandou muito bem!';
+      options.replaceChildren();
+      start.disabled = false;
+      feedback.textContent = 'Quer tentar mais uma rodada?';
+      return;
+    }
+
+    const first = Math.floor(Math.random() * 12) + 1;
+    const second = Math.floor(Math.random() * 12) + 1;
+    const operation = Math.random() < 0.5 ? '+' : '−';
+    answer = operation === '+' ? first + second : Math.abs(first - second);
+    const prompt = operation === '+' ? `${first} + ${second}` : `${Math.max(first, second)} − ${Math.min(first, second)}`;
+    running = true;
+    question.textContent = `${prompt} = ?`;
+    const choices = new Set([answer]);
+    while (choices.size < 4) {
+      choices.add(Math.max(0, answer + Math.floor(Math.random() * 9) - 4));
+    }
+    options.replaceChildren();
+    [...choices].sort(() => Math.random() - 0.5).forEach((value) => {
+      const button = document.createElement('button');
+      button.type = 'button';
+      button.className = 'math-option';
+      button.textContent = String(value);
+      button.addEventListener('click', () => {
+        if (!running) return;
+        if (value === answer) {
+          awardGameXp(5);
+          feedback.textContent = 'Resposta certa! +5 XP ✨';
+          round += 1;
+          roundLabel.textContent = `${round}/5`;
+          running = false;
+          options.querySelectorAll('button').forEach((choice) => {
+            choice.disabled = true;
+          });
+          setTimeout(() => {
+            if (start.disabled) nextQuestion();
+          }, 550);
+        } else {
+          feedback.textContent = 'Quase! Tente outra resposta.';
+          button.classList.add('wrong-answer');
+          setTimeout(() => button.classList.remove('wrong-answer'), 450);
+        }
+      });
+      options.appendChild(button);
+    });
+  };
+
+  start.addEventListener('click', () => {
+    round = 0;
+    roundLabel.textContent = '0/5';
+    running = true;
+    start.disabled = true;
+    feedback.textContent = 'Vamos lá!';
+    nextQuestion();
+  });
+}
+
 function setupCalendarActions() {
-  document.getElementById('prevMonth').addEventListener('click', () => {
+  const prevMonth = document.getElementById('prevMonth');
+  const nextMonth = document.getElementById('nextMonth');
+
+  if (prevMonth) prevMonth.addEventListener('click', () => {
     state.month -= 1;
     if (state.month < 0) {
       state.month = 11;
@@ -384,7 +779,7 @@ function setupCalendarActions() {
     renderCalendar();
   });
 
-  document.getElementById('nextMonth').addEventListener('click', () => {
+  if (nextMonth) nextMonth.addEventListener('click', () => {
     state.month += 1;
     if (state.month > 11) {
       state.month = 0;
@@ -401,17 +796,29 @@ function setupCalendarActions() {
   });
 }
 
-themeToggle.addEventListener('click', () => {
-  const nextTheme = state.theme === 'dark' ? 'light' : 'dark';
-  setTheme(nextTheme);
-  saveData();
+if (themeToggle) {
+  themeToggle.addEventListener('click', () => {
+    const nextTheme = state.theme === 'dark' ? 'light' : 'dark';
+    setTheme(nextTheme);
+    saveData();
+  });
+}
+
+window.addEventListener('rumo:xp', (event) => {
+  const points = Number(event.detail);
+  if (Number.isFinite(points) && points > 0) awardGameXp(points);
 });
 
+setupAccessGate();
 loadData();
 setupAssessment();
 setupCalendarActions();
 setupBrainChallenge();
 setupNumberGame();
 setupWordGame();
+setupClickGame();
+setupMathGame();
 initMemoryGame();
+const restartMemory = document.getElementById('restartMemory');
+if (restartMemory) restartMemory.addEventListener('click', initMemoryGame);
 loadCheckins();

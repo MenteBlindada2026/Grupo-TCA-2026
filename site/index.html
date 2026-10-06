@@ -4,70 +4,84 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <meta name="theme-color" content="#0f172a" />
-    <meta
-      name="description"
-      content="Site educativo sobre drogas na adolescência, autocuidado, apoio e recursos para prevenção."
-    />
+    <meta name="description" content="Um espaço de apoio, autocuidado e prevenção para adolescentes." />
+    <link rel="icon" type="image/svg+xml" href="brain-lightning.svg" />
     <link rel="manifest" href="manifest.webmanifest" />
     <link rel="stylesheet" href="styles.css" />
     <title>Rumo ao Equilíbrio</title>
   </head>
   <body>
+    <section class="access-gate" id="accessGate" role="dialog" aria-modal="true" aria-labelledby="accessTitle">
+      <form class="access-card" id="accessForm">
+        <span class="access-logo" aria-hidden="true">🧠⚡</span>
+        <p class="eyebrow highlight">Um espaço para você</p>
+        <h1 id="accessTitle">Boas-vindas!</h1>
+        <p>Como podemos te chamar? Seu nome fica salvo somente neste dispositivo.</p>
+        <label for="profileName">Seu nome</label>
+        <input id="profileName" name="profileName" autocomplete="given-name" maxlength="40" minlength="2" autofocus required />
+        <p class="access-error" id="accessError" aria-live="polite"></p>
+        <button class="primary-btn" type="submit">Entrar no site</button>
+        <small>Esta tela não cria uma conta nem protege informações com senha.</small>
+      </form>
+    </section>
     <div class="bg-glow glow-one"></div>
     <div class="bg-glow glow-two"></div>
-
     <header class="topbar panel">
-      <div class="brand-wrap">
-        <div class="brand-logo">R</div>
-        <div>
-          <p class="eyebrow">Apoio e prevenção</p>
-          <h1>Rumo ao Equilíbrio</h1>
-        </div>
-      </div>
-
-      <nav class="nav-links">
-        <a href="#inicio">Início</a>
-        <a href="#pesquisa">Pesquisa</a>
-        <a href="#calendario">Calendário</a>
-        <a href="#jogos">Jogos</a>
-        <a href="#caps">CAPS</a>
+      <a class="brand-wrap" href="index.html" aria-label="Rumo ao Equilíbrio - início">
+        <svg class="brand-logo" viewBox="0 0 64 64" role="img" aria-label="Cérebro com raio">
+          <path d="M29 11c-3-5-11-4-13 2-7-1-11 7-7 12-5 5-2 13 4 14-1 7 6 12 12 8l4-3V14z" fill="#bd75ff" stroke="#202f47" stroke-width="3" stroke-linejoin="round"/>
+          <path d="M29 13c5-5 13-2 13 4 7 0 10 8 6 13 4 5 1 12-5 13 0 7-8 11-13 6l-1-1V14z" fill="#8b5bd0" stroke="#202f47" stroke-width="3" stroke-linejoin="round"/>
+          <path d="M28 17v27M18 20l7 5m-13 5 10 1m22-11-8 6m14 7-10 1m-14 5-7 4m15-4 8 5" fill="none" stroke="#f4d8ff" stroke-width="2.5" stroke-linecap="round"/>
+          <path d="m49 4-11 18h8l-5 14 16-21h-9l5-11z" fill="#ffcf4a" stroke="#202f47" stroke-width="2" stroke-linejoin="round"/>
+        </svg>
+        <span>
+          <span class="eyebrow">Apoio e prevenção</span>
+          <span class="brand-title">Rumo ao Equilíbrio</span>
+        </span>
+      </a>
+      <nav class="nav-links" aria-label="Navegação principal">
+        <a href="index.html" aria-current="page">Início</a>
+        <a href="pesquisa.html">Pesquisa</a>
+        <a href="calendario.html">Calendário</a>
+        <a href="jogos.html">Jogos</a>
+        <a href="caps.html">CAPS</a>
       </nav>
-
-      <button id="themeToggle" class="theme-toggle" aria-label="Alternar tema">
-        <span class="theme-icon" aria-hidden="true">☀</span>
-        <span id="themeLabel">Modo claro</span>
+      <button id="themeToggle" class="theme-toggle" type="button" aria-label="Alternar tema">
+        <span class="theme-icon" aria-hidden="true">☾</span>
+        <span id="themeLabel">Modo escuro</span>
       </button>
+      <span id="profileGreeting" class="profile-greeting"></span>
+      <button id="signOut" class="sign-out" type="button">Sair</button>
     </header>
 
     <main class="container">
-      <section id="inicio" class="hero section panel">
+      <section class="hero section panel">
         <div class="hero-copy">
-          <p class="eyebrow highlight">Guia de início</p>
-          <h2>Você não precisa passar por isso sozinho.</h2>
+          <p class="eyebrow highlight">Um passo de cada vez</p>
+          <h1>Você não precisa passar por isso sozinho.</h1>
           <p>
-            Este site foi pensado para orientar adolescentes sobre riscos do uso de drogas,
-            oferecer acolhimento e mostrar passos simples de autocuidado. Aqui você pode:
+            Um espaço acolhedor para aprender sobre autocuidado, acompanhar sua rotina
+            e descobrir onde encontrar apoio. Escolha por onde quer começar.
           </p>
           <ul class="check-list">
-            <li>Responder uma pesquisa de apoio.</li>
-            <li>Registrar como está no seu calendário.</li>
-            <li>Usar uma rotina para aliviar sintomas de abstinência.</li>
-            <li>Exercitar a mente com jogos leves e educativos.</li>
+            <li>Faça uma autoavaliação rápida e privada.</li>
+            <li>Acompanhe seu dia no calendário.</li>
+            <li>Treine foco e memória com desafios divertidos.</li>
+            <li>Encontre informações sobre apoio profissional.</li>
           </ul>
           <div class="hero-actions">
-            <a href="#pesquisa" class="primary-btn">Começar avaliação</a>
-            <a href="#calendario" class="secondary-btn">Abrir calendário</a>
+            <a href="pesquisa.html" class="primary-btn">Começar avaliação</a>
+            <a href="jogos.html" class="secondary-btn">Explorar jogos</a>
           </div>
         </div>
-
-        <div class="hero-card card-gradient">
+        <aside class="hero-card">
           <div class="mini-stat">
-            <span class="stat-label">Meta diária</span>
-            <strong id="dailyGoalText">75% da rotina</strong>
+            <span class="stat-label">Sua meta semanal</span>
+            <strong id="dailyGoalText">0% da meta</strong>
           </div>
           <div class="progress-wrap">
-            <div class="progress-bar">
-              <span id="goalProgressBar" style="width: 75%"></span>
+            <div class="progress-bar" role="progressbar" aria-label="Progresso da meta semanal" aria-valuemin="0" aria-valuemax="100">
+              <span id="goalProgressBar" style="width: 0%"></span>
             </div>
           </div>
           <div class="goal-notes">
@@ -75,188 +89,33 @@
             <span>🧠 Mente clara</span>
             <span>🌿 Respiração</span>
           </div>
-        </div>
+        </aside>
       </section>
 
       <section class="section panel feature-showcase">
         <div class="section-header center">
-          <p class="eyebrow">Como funciona</p>
-          <h3>Passos simples para começar</h3>
+          <p class="eyebrow">Seu espaço, seu ritmo</p>
+          <h2>Escolha seu próximo passo</h2>
         </div>
-
         <div class="feature-grid">
-          <article class="feature-card">
-            <div class="feature-icon">01</div>
-            <h4>Autoavaliação</h4>
-            <p>Responda perguntas rápidas para entender se você precisa de apoio agora.</p>
-          </article>
-          <article class="feature-card">
-            <div class="feature-icon">02</div>
-            <h4>Calendário</h4>
-            <p>Registre como está o seu dia e acompanhe suas pequenas conquistas.</p>
-          </article>
-          <article class="feature-card">
-            <div class="feature-icon">03</div>
-            <h4>Recuperação</h4>
-            <p>Use dicas de respiração, foco e apoio para manter a mente forte.</p>
-          </article>
-        </div>
-      </section>
-
-      <section id="pesquisa" class="section panel">
-        <div class="section-header">
-          <p class="eyebrow">Autoavaliação</p>
-          <h3>Você precisa de ajuda?</h3>
-        </div>
-
-        <form id="assessmentForm" class="assessment-form">
-          <div class="question">
-            <label>1. Você sente que o uso de cigarro, vape ou outras substâncias está te afetando emocionalmente?</label>
-            <div class="answer-choice">
-              <label><input type="radio" name="q1" value="1" /> Sim</label>
-              <label><input type="radio" name="q1" value="0" /> Não</label>
-            </div>
-          </div>
-
-          <div class="question">
-            <label>2. Tem dificuldades para controlar o impulso de usar novamente?</label>
-            <div class="answer-choice">
-              <label><input type="radio" name="q2" value="1" /> Sim</label>
-              <label><input type="radio" name="q2" value="0" /> Não</label>
-            </div>
-          </div>
-
-          <div class="question">
-            <label>3. Você tem se sentido irritado, ansioso ou triste com frequência?</label>
-            <div class="answer-choice">
-              <label><input type="radio" name="q3" value="1" /> Sim</label>
-              <label><input type="radio" name="q3" value="0" /> Não</label>
-            </div>
-          </div>
-
-          <div class="question">
-            <label>4. Já pensou em pedir ajuda para alguém de confiança?</label>
-            <div class="answer-choice">
-              <label><input type="radio" name="q4" value="1" /> Sim</label>
-              <label><input type="radio" name="q4" value="0" /> Não</label>
-            </div>
-          </div>
-
-          <div class="question">
-            <label>5. Você consegue manter rotina, sono e alimentação sem usar a substância?</label>
-            <div class="answer-choice">
-              <label><input type="radio" name="q5" value="1" /> Sim</label>
-              <label><input type="radio" name="q5" value="0" /> Não</label>
-            </div>
-          </div>
-
-          <button type="submit" class="primary-btn">Enviar avaliação</button>
-        </form>
-
-        <div id="assessmentResult" class="assessment-result hidden">
-          <h4>Resultado da sua avaliação</h4>
-          <p id="assessmentMessage"></p>
-        </div>
-      </section>
-
-      <section id="calendario" class="section panel">
-        <div class="section-header">
-          <p class="eyebrow">Monitoramento diário</p>
-          <h3>Como você está hoje?</h3>
-        </div>
-
-        <div class="calendar-layout">
-          <div>
-            <div class="calendar-head">
-              <button id="prevMonth" class="small-btn">❮</button>
-              <h4 id="monthLabel"></h4>
-              <button id="nextMonth" class="small-btn">❯</button>
-            </div>
-            <div id="calendarGrid" class="calendar-grid"></div>
-          </div>
-
-          <div class="checkin-card">
-            <h4 id="selectedDateLabel">Selecione uma data</h4>
-            <p>Você fumou hoje?</p>
-
-            <div class="checkin-buttons">
-              <button class="yes-btn" data-smoked="1">Sim</button>
-              <button class="no-btn" data-smoked="0">Não</button>
-            </div>
-
-            <div id="checkinResponse" class="checkin-response empty">
-              Sua resposta aparecerá aqui com apoio e técnicas.
-            </div>
-          </div>
-        </div>
-      </section>
-
-      <section id="jogos" class="section panel">
-        <div class="section-header">
-          <p class="eyebrow">Exercite a mente</p>
-          <h3>Jogos e desafios de foco</h3>
-        </div>
-
-        <div class="games-layout">
-          <div class="game-card">
-            <h4>Jogo da memória</h4>
-            <div id="memoryGame" class="memory-game"></div>
-            <p class="game-score">Movimentos: <span id="movesCount">0</span></p>
-          </div>
-
-          <div class="game-card">
-            <h4>Desafio mental</h4>
-            <div class="brain-quiz">
-              <p id="brainQuestion">Qual palavra completa a frase: “Eu posso começar hoje com...”</p>
-              <button class="brain-option" data-answer="1">foco</button>
-              <button class="brain-option" data-answer="0">desistir</button>
-              <button class="brain-option" data-answer="0">pânico</button>
-            </div>
-            <p id="brainFeedback" class="brain-feedback">Escolha a resposta certa.</p>
-          </div>
-
-          <div class="game-card">
-            <h4>Ordem numérica</h4>
-            <p class="game-description">Selecione os números na ordem certa.</p>
-            <div id="numberGame" class="number-game"></div>
-            <p id="numberFeedback" class="brain-feedback">Recomece com o próximo desafio.</p>
-          </div>
-
-          <div class="game-card">
-            <h4>Anagrama</h4>
-            <p class="game-description">Reforme a palavra para encontrar o sentido.</p>
-            <div id="wordGame" class="word-game"></div>
-            <p id="wordFeedback" class="brain-feedback">Escolha a palavra correta.</p>
-          </div>
-        </div>
-      </section>
-
-      <section id="caps" class="section panel">
-        <div class="section-header">
-          <p class="eyebrow">Apoio profissional</p>
-          <h3>CAPS e serviços de apoio</h3>
-        </div>
-
-        <div class="caps-layout">
-          <div class="caps-info">
-            <p>
-              Em caso de uso frequente ou sintomas intensos, vale buscar apoio de um CAPS ou profissional da saúde.
-              O atendimento é confidencial e pode ajudar a organizar cuidado, estabilidade emocional e estratégias de recuperação.
-            </p>
-            <a href="https://www.gov.br/saude/pt-br/acesso-a-informacao/acoes-e-programas/caps" target="_blank" rel="noreferrer" class="primary-btn">Acessar CAPS</a>
-          </div>
-
-          <div class="qr-box">
-            <img
-              src="https://api.qrserver.com/v1/create-qr-code/?size=180x180&data=https://www.gov.br/saude/pt-br/acesso-a-informacao/acoes-e-programas/caps"
-              alt="QR Code para acesso ao CAPS"
-            />
-            <p>Escaneie para acessar ajuda.</p>
-          </div>
+          <a class="feature-card" href="pesquisa.html">
+            <span class="feature-icon">01</span>
+            <h3>Autoavaliação</h3>
+            <p>Reflita sobre como você está e veja sugestões de apoio.</p>
+          </a>
+          <a class="feature-card" href="calendario.html">
+            <span class="feature-icon">02</span>
+            <h3>Calendário</h3>
+            <p>Registre seus dias e valorize cada pequena conquista.</p>
+          </a>
+          <a class="feature-card" href="jogos.html">
+            <span class="feature-icon">03</span>
+            <h3>Jogos e desafios</h3>
+            <p>Ganhe pontos enquanto exercita foco, memória e raciocínio.</p>
+          </a>
         </div>
       </section>
     </main>
-
     <script src="app.js"></script>
   </body>
 </html>
