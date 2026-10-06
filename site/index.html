@@ -8,8 +8,8 @@
       name="description"
       content="Site educativo sobre drogas na adolescência, autocuidado, apoio e recursos para prevenção."
     />
-    <link rel="manifest" href="/manifest.webmanifest" />
-    <link rel="stylesheet" href="/styles.css" />
+    <link rel="manifest" href="manifest.webmanifest" />
+    <link rel="stylesheet" href="styles.css" />
     <title>Rumo ao Equilíbrio</title>
   </head>
   <body>
@@ -34,10 +34,8 @@
       </nav>
 
       <button id="themeToggle" class="theme-toggle" aria-label="Alternar tema">
-        <span class="toggle-track">
-          <span class="toggle-knob"></span>
-        </span>
-        <span id="themeLabel">Modo escuro</span>
+        <span class="theme-icon" aria-hidden="true">☀</span>
+        <span id="themeLabel">Modo claro</span>
       </button>
     </header>
 
@@ -216,6 +214,20 @@
             </div>
             <p id="brainFeedback" class="brain-feedback">Escolha a resposta certa.</p>
           </div>
+
+          <div class="game-card">
+            <h4>Ordem numérica</h4>
+            <p class="game-description">Selecione os números na ordem certa.</p>
+            <div id="numberGame" class="number-game"></div>
+            <p id="numberFeedback" class="brain-feedback">Recomece com o próximo desafio.</p>
+          </div>
+
+          <div class="game-card">
+            <h4>Anagrama</h4>
+            <p class="game-description">Reforme a palavra para encontrar o sentido.</p>
+            <div id="wordGame" class="word-game"></div>
+            <p id="wordFeedback" class="brain-feedback">Escolha a palavra correta.</p>
+          </div>
         </div>
       </section>
 
@@ -245,19 +257,6 @@
       </section>
     </main>
 
-    <div id="welcomeModal" class="modal">
-      <div class="modal-content panel">
-        <h3>Antes de continuar</h3>
-        <p>
-          Quer ativar lembrete no calendário para lembrar de entrar no site e registrar como está hoje?
-        </p>
-        <div class="modal-actions">
-          <button id="confirmReminder" class="primary-btn">Sim, ativar</button>
-          <button id="dismissReminder" class="secondary-btn">Não agora</button>
-        </div>
-      </div>
-    </div>
-
-    <script src="/app.js"></script>
+    <script src="app.js"></script>
   </body>
 </html>

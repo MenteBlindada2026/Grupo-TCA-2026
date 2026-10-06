@@ -4,16 +4,17 @@ const state = {
   year: new Date().getFullYear(),
   selectedDate: new Date().toISOString().slice(0, 10),
   checkins: [],
+  assessments: [],
   memoryCards: [],
   memoryFlipped: [],
   memoryMatched: [],
   moves: 0,
-  reminderEnabled: false,
-  reminderAccepted: false,
 };
 
+const STORAGE_KEY = 'rumoData';
 const themeToggle = document.getElementById('themeToggle');
 const themeLabel = document.getElementById('themeLabel');
+const themeIcon = document.querySelector('.theme-icon');
 const calendarGrid = document.getElementById('calendarGrid');
 const monthLabel = document.getElementById('monthLabel');
 const selectedDateLabel = document.getElementById('selectedDateLabel');
@@ -21,37 +22,53 @@ const checkinResponse = document.getElementById('checkinResponse');
 const assessmentForm = document.getElementById('assessmentForm');
 const assessmentResult = document.getElementById('assessmentResult');
 const assessmentMessage = document.getElementById('assessmentMessage');
-const welcomeModal = document.getElementById('welcomeModal');
 const goalProgressBar = document.getElementById('goalProgressBar');
 const dailyGoalText = document.getElementById('dailyGoalText');
 const memoryGame = document.getElementById('memoryGame');
 const movesCount = document.getElementById('movesCount');
 const brainQuestion = document.getElementById('brainQuestion');
 const brainFeedback = document.getElementById('brainFeedback');
+const numberGame = document.getElementById('numberGame');
+const numberFeedback = document.getElementById('numberFeedback');
+const wordGame = document.getElementById('wordGame');
+const wordFeedback = document.getElementById('wordFeedback');
+
+function saveData() {
+  const data = {
+    theme: state.theme,
+    checkins: state.checkins,
+    assessments: state.assessments
+  };
+  localStorage.setItem(STORAGE_KEY, JSON.stringify(data));
+}
 
 function setTheme(theme) {
   document.body.dataset.theme = theme;
   state.theme = theme;
-  themeLabel.textContent = theme === 'dark' ? 'Modo escuro' : 'Modo claro';
-  fetch('/api/settings', {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ key: 'theme', value: theme })
-  }).catch(() => {});
+  const isDark = theme === 'dark';
+  themeLabel.textContent = isDark ? 'Modo escuro' : 'Modo claro';
+  themeIcon.textContent = isDark ? '☾' : '☀';
+  themeToggle.setAttribute('aria-label', isDark ? 'Ativar modo claro' : 'Ativar modo escuro');
 }
 
-function loadSettings() {
-  fetch('/api/settings')
-    .then((res) => res.json())
-    .then((settings) => {
-      const savedTheme = settings.theme || 'dark';
-      setTheme(savedTheme);
-      state.reminderEnabled = settings.reminderEnabled === 'true';
-      state.reminderAccepted = settings.reminderAccepted === 'true';
-    })
-    .catch(() => {
-      setTheme('dark');
-    });
+function loadData() {
+  try {
+    const savedData = JSON.parse(localStorage.getItem(STORAGE_KEY) || '{}');
+    const oldSettings = JSON.parse(localStorage.getItem('rumoSettings') || '{}');
+    const oldCheckins = JSON.parse(localStorage.getItem('rumoCheckins') || '[]');
+    const oldAssessments = JSON.parse(localStorage.getItem('rumoAssessments') || '[]');
+
+    state.theme = savedData.theme || oldSettings.theme || 'dark';
+    state.checkins = Array.isArray(savedData.checkins) ? savedData.checkins : oldCheckins;
+    state.assessments = Array.isArray(savedData.assessments) ? savedData.assessments : oldAssessments;
+  } catch {
+    state.theme = 'dark';
+    state.checkins = [];
+    state.assessments = [];
+  }
+
+  setTheme(state.theme);
+  saveData();
 }
 
 function formatDate(dateString) {
@@ -143,48 +160,41 @@ function updateMetaProgress() {
   const checkins = state.checkins.filter((entry) => Number(entry.smoked_today) === 0);
   const progress = Math.min(Math.round((checkins.length / 7) * 100), 100);
   goalProgressBar.style.width = `${progress}%`;
-  dailyGoalText.textContent = `${progress}% da meta`; 
+  dailyGoalText.textContent = `${progress}% da meta`;
 }
 
-function fetchCheckins() {
-  fetch('/api/checkins')
-    .then((res) => res.json())
-    .then((data) => {
-      state.checkins = data;
-      renderCalendar();
-      renderCheckinCard();
-      updateMetaProgress();
-    })
-    .catch(() => {
-      state.checkins = [];
-    });
+function loadCheckins() {
+  renderCalendar();
+  renderCheckinCard();
+  updateMetaProgress();
 }
 
 function saveCheckin(smokedToday) {
-  const payload = {
+  const message = smokedToday
+    ? 'Você já passou por dias difíceis antes e isso não define o seu valor. Cada passo conta.'
+    : 'Parabéns por escolher cuidar de si. Respire fundo, beba água e mantenha o foco.';
+  const tips = smokedToday
+    ? 'Técnicas úteis: beba água, respire por 4 segundos e expire por 6, dê um passo para fora da rotina, e ligue para alguém de confiança.'
+    : 'Para aliviar sintomas da nicotina: caminhe 10 minutos, tome água, chupe gelo, use hortelã, ou faça respiração profunda por 5 minutos.';
+
+  const existing = state.checkins.find((entry) => entry.date === state.selectedDate);
+  const checkin = {
     date: state.selectedDate,
-    smokedToday,
-    message: smokedToday
-      ? 'Você já passou por dias difíceis antes e isso não define o seu valor. Cada passo conta.'
-      : 'Parabéns por escolher cuidar de si. Respire fundo, beba água e mantenha o foco.'
+    smoked_today: smokedToday ? 1 : 0,
+    message,
+    tips
   };
 
-  if (smokedToday) {
-    payload.tips = 'Técnicas úteis: beba água, respire por 4 segundos e expire por 6, dê um passo para fora da rotina, e ligue para alguém de confiança.';
+  if (existing) {
+    Object.assign(existing, checkin);
   } else {
-    payload.tips = 'Para aliviar sintomas da nicotina: caminhe 10 minutos, tome água, chupe gelo, use hortelã, ou faça respiração profunda por 5 minutos.';
+    state.checkins.push(checkin);
   }
 
-  fetch('/api/checkin', {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify(payload)
-  })
-    .then(() => fetchCheckins())
-    .catch(() => {
-      checkinResponse.className = 'checkin-response';
-      checkinResponse.textContent = 'Não foi possível salvar o check-in agora. Tente novamente.';
-    });
+  saveData();
+  renderCalendar();
+  renderCheckinCard();
+  updateMetaProgress();
 }
 
 function setupAssessment() {
@@ -226,11 +236,14 @@ function setupAssessment() {
     assessmentMessage.textContent = `${message} Nível: ${level}.`;
     assessmentResult.classList.remove('hidden');
 
-    fetch('/api/assessment', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ score, level, answers })
-    }).catch(() => {});
+    state.assessments.unshift({
+      score,
+      level,
+      answers,
+      createdAt: new Date().toISOString()
+    });
+    state.assessments = state.assessments.slice(0, 10);
+    saveData();
   });
 }
 
@@ -306,6 +319,61 @@ function setupBrainChallenge() {
   });
 }
 
+function setupNumberGame() {
+  const sequence = [3, 7, 2, 9];
+  const options = [3, 7, 2, 9, 5];
+  let current = 0;
+
+  numberGame.innerHTML = `
+    <p>Ordem: ${sequence.join(' · ')}</p>
+    <div class="number-options"></div>
+  `;
+  const optionContainer = numberGame.querySelector('.number-options');
+  options.forEach((option) => {
+    const button = document.createElement('button');
+    button.className = 'number-option';
+    button.textContent = option;
+    button.addEventListener('click', () => {
+      if (option === sequence[current]) {
+        button.classList.add('correct');
+        current += 1;
+        numberFeedback.textContent = `${current} de ${sequence.length} correto${current === sequence.length ? '!' : ''}`;
+        if (current === sequence.length) {
+          numberFeedback.textContent = 'Ordem concluída! Você treinou seu raciocínio.';
+        }
+      } else {
+        numberFeedback.textContent = 'Não é esse número. Tente novamente.';
+        current = 0;
+      }
+    });
+    optionContainer.appendChild(button);
+  });
+}
+
+function setupWordGame() {
+  const word = { scrambled: 'HONOS', answer: 'SONHO' };
+  const options = ['SONHO', 'HOSNO', 'HONOS', 'NOHOS'];
+
+  wordGame.innerHTML = `
+    <p>Palavra: ${word.scrambled}</p>
+    <div class="word-options"></div>
+  `;
+  const optionContainer = wordGame.querySelector('.word-options');
+  options.forEach((option) => {
+    const button = document.createElement('button');
+    button.className = 'word-option';
+    button.textContent = option;
+    button.addEventListener('click', () => {
+      const correct = option === word.answer;
+      button.classList.toggle('correct', correct);
+      wordFeedback.textContent = correct
+        ? 'Correto! A palavra é “SONHO”.'
+        : 'Tente novamente. A palavra correta é “SONHO”.';
+    });
+    optionContainer.appendChild(button);
+  });
+}
+
 function setupCalendarActions() {
   document.getElementById('prevMonth').addEventListener('click', () => {
     state.month -= 1;
@@ -333,72 +401,17 @@ function setupCalendarActions() {
   });
 }
 
-async function requestReminderPermission() {
-  if (!('Notification' in window)) {
-    state.reminderEnabled = false;
-    return;
-  }
-
-  const permission = await Notification.requestPermission();
-  state.reminderEnabled = permission === 'granted';
-
-  fetch('/api/settings', {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ key: 'reminderEnabled', value: String(state.reminderEnabled) })
-  }).catch(() => {});
-
-  if (state.reminderEnabled) {
-    new Notification('Lembrete do site', {
-      body: 'Chegou a hora de registrar como você está hoje.'
-    });
-  }
-}
-
-function showWelcomeModal() {
-  const hasSeen = localStorage.getItem('reminderModalSeen');
-  if (!hasSeen) {
-    welcomeModal.classList.add('open');
-    localStorage.setItem('reminderModalSeen', 'true');
-  }
-}
-
-document.getElementById('confirmReminder').addEventListener('click', async () => {
-  welcomeModal.classList.remove('open');
-  await requestReminderPermission();
-  state.reminderAccepted = true;
-  fetch('/api/settings', {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ key: 'reminderAccepted', value: 'true' })
-  }).catch(() => {});
-});
-
-document.getElementById('dismissReminder').addEventListener('click', () => {
-  welcomeModal.classList.remove('open');
-  state.reminderAccepted = false;
-  fetch('/api/settings', {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ key: 'reminderAccepted', value: 'false' })
-  }).catch(() => {});
-});
-
 themeToggle.addEventListener('click', () => {
   const nextTheme = state.theme === 'dark' ? 'light' : 'dark';
   setTheme(nextTheme);
+  saveData();
 });
 
-loadSettings();
+loadData();
 setupAssessment();
 setupCalendarActions();
 setupBrainChallenge();
+setupNumberGame();
+setupWordGame();
 initMemoryGame();
-fetchCheckins();
-showWelcomeModal();
-
-if ('serviceWorker' in navigator) {
-  window.addEventListener('load', () => {
-    navigator.serviceWorker.register('/sw.js').catch(() => {});
-  });
-}
+loadCheckins();
