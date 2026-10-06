@@ -1,0 +1,115 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="theme-color" content="#0f172a" />
+    <meta name="description" content="Práticas suaves de respiração, atenção plena e estratégias para lidar com a vontade de fumar." />
+    <link rel="icon" type="image/svg+xml" href="brain-lightning.svg" />
+    <link rel="manifest" href="manifest.webmanifest" />
+    <link rel="stylesheet" href="styles.css" />
+    <title>Exercícios de bem-estar | Rumo ao Equilíbrio</title>
+  </head>
+  <body class="wellbeing-page">
+    <section class="access-gate" id="accessGate" role="dialog" aria-modal="true" aria-labelledby="accessTitle">
+      <form class="access-card" id="accessForm">
+        <span class="access-logo" aria-hidden="true">🧠⚡</span>
+        <p class="eyebrow highlight">Um espaço para você</p>
+        <h1 id="accessTitle">Boas-vindas!</h1>
+        <p>Como podemos te chamar? Seu nome fica salvo somente neste dispositivo.</p>
+        <label for="profileName">Seu nome</label>
+        <input id="profileName" name="profileName" autocomplete="given-name" maxlength="40" minlength="2" autofocus required />
+        <p class="access-error" id="accessError" aria-live="polite"></p>
+        <button class="primary-btn" type="submit">Entrar no site</button>
+        <small>Esta tela não cria uma conta nem protege informações com senha.</small>
+      </form>
+    </section>
+    <header class="topbar panel">
+      <a class="brand-wrap" href="index.html" aria-label="Rumo ao Equilíbrio - início">
+        <img class="brand-logo" src="brain-lightning.svg" alt="" />
+        <span><span class="eyebrow">Apoio e prevenção</span><span class="brand-title">Rumo ao Equilíbrio</span></span>
+      </a>
+      <nav class="nav-links" aria-label="Navegação principal">
+        <a href="index.html">Início</a>
+        <a href="pesquisa.html">Pesquisa</a>
+        <a href="calendario.html">Calendário</a>
+        <a href="jogos.html">Jogos</a>
+        <a href="exercicios.html" aria-current="page">Exercícios</a>
+        <a href="caps.html">CAPS</a>
+      </nav>
+      <button id="themeToggle" class="theme-toggle" type="button" aria-label="Alternar tema">
+        <span class="theme-icon" aria-hidden="true">☾</span><span id="themeLabel">Modo escuro</span>
+      </button>
+      <span id="profileGreeting" class="profile-greeting"></span>
+      <button id="signOut" class="sign-out" type="button">Sair</button>
+    </header>
+
+    <main class="container wellbeing-container">
+      <section class="wellbeing-hero">
+        <p class="eyebrow highlight">Cuidado no seu ritmo</p>
+        <h1>Uma pausa para cuidar de você</h1>
+        <p>Escolha uma prática simples. Elas podem ajudar você a atravessar momentos de vontade ou inquietação, mas não substituem acompanhamento profissional.</p>
+      </section>
+
+      <section class="wellbeing-grid" aria-label="Exercícios guiados">
+        <article class="wellbeing-card breathing-card">
+          <span class="wellbeing-icon" aria-hidden="true">🌬️</span>
+          <p class="eyebrow">01 · RESPIRAÇÃO</p>
+          <h2>Respire com calma</h2>
+          <p>Encontre uma posição confortável. Inspire suavemente pelo nariz e expire sem forçar, um pouco mais devagar. Não prenda o ar.</p>
+          <div class="breathing-guide" aria-live="polite">
+            <span id="breathingCircle" class="breathing-circle">Pronto?</span>
+            <p id="breathingInstruction">Faça no seu ritmo. Você pode parar quando quiser.</p>
+            <p id="breathingTimer" class="wellbeing-timer">1 minuto</p>
+          </div>
+          <div class="wellbeing-actions">
+            <button id="startBreathing" class="wellbeing-button" type="button">Começar respiração</button>
+            <button id="stopBreathing" class="wellbeing-button secondary" type="button" disabled>Parar</button>
+          </div>
+        </article>
+
+        <article class="wellbeing-card grounding-card">
+          <span class="wellbeing-icon" aria-hidden="true">🌿</span>
+          <p class="eyebrow">02 · ATERRAMENTO</p>
+          <h2>Volte ao momento presente</h2>
+          <p>Com tranquilidade, perceba o ambiente ao seu redor. Você não precisa fechar os olhos.</p>
+          <ol class="grounding-list">
+            <li><strong>5</strong><span>coisas que você consegue ver</span></li>
+            <li><strong>4</strong><span>coisas que consegue sentir pelo toque</span></li>
+            <li><strong>3</strong><span>sons que consegue ouvir</span></li>
+            <li><strong>2</strong><span>cheiros que consegue notar</span></li>
+            <li><strong>1</strong><span>sensação do seu corpo neste instante</span></li>
+          </ol>
+          <p id="groundingFeedback" class="wellbeing-feedback" aria-live="polite">Marque cada etapa quando terminar, sem pressa.</p>
+          <button id="resetGrounding" class="wellbeing-button secondary" type="button">Recomeçar etapas</button>
+        </article>
+
+        <article class="wellbeing-card urge-card">
+          <span class="wellbeing-icon" aria-hidden="true">🌊</span>
+          <p class="eyebrow">03 · VONTADE DE FUMAR</p>
+          <h2>Deixe a vontade passar</h2>
+          <p>A vontade pode mudar com o tempo. Por alguns minutos, observe o que sente e escolha uma pequena distração segura.</p>
+          <label class="urge-label" for="urgeLevel">Quanto forte está a vontade agora?</label>
+          <input id="urgeLevel" class="urge-slider" type="range" min="0" max="10" value="5" />
+          <output id="urgeValue" class="urge-value" for="urgeLevel">5 de 10</output>
+          <div class="urge-actions">
+            <button class="urge-prompt" type="button" data-prompt="Tome alguns goles de água e perceba a temperatura do copo.">💧 Beber água</button>
+            <button class="urge-prompt" type="button" data-prompt="Se for confortável e seguro para você, caminhe um pouco ou mude de ambiente.">🚶 Mudar de ambiente</button>
+            <button class="urge-prompt" type="button" data-prompt="Mande uma mensagem ou converse com alguém em quem confia.">💬 Falar com alguém</button>
+          </div>
+          <p id="urgeFeedback" class="wellbeing-feedback" aria-live="polite">Escolha uma ideia para este momento. Não precisa fazer todas.</p>
+          <button id="startUrgeTimer" class="wellbeing-button" type="button">Fazer uma pausa de 2 minutos</button>
+          <p id="urgeTimer" class="wellbeing-timer" aria-live="polite"></p>
+        </article>
+      </section>
+
+      <aside class="wellbeing-note">
+        <strong>Importante</strong>
+        <p>Se qualquer prática causar tontura, dor, falta de ar ou mal-estar, pare e respire normalmente. Se os sintomas forem intensos ou persistentes, procure um profissional de saúde ou um CAPS, com apoio de alguém de confiança.</p>
+        <a href="caps.html">Encontrar informações de apoio profissional →</a>
+      </aside>
+    </main>
+    <script src="app.js"></script>
+    <script src="exercicios.js"></script>
+  </body>
+</html>

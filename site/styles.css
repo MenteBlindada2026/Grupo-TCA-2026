@@ -276,7 +276,7 @@ h1, h2, h3, h4, p { margin-top: 0; }
 
 .feature-grid {
   display: grid;
-  grid-template-columns: repeat(3, minmax(0, 1fr));
+  grid-template-columns: repeat(4, minmax(0, 1fr));
   gap: 18px;
   margin-top: 22px;
 }
@@ -1219,6 +1219,375 @@ body.research-page:not([data-access-granted='true']) main {
   color: var(--text);
 }
 
+.wellbeing-page {
+  background-color: #edf4f0;
+  background-image: radial-gradient(circle at 10% 10%, #dcece3, transparent 32%);
+  color: #18352d;
+}
+
+.wellbeing-page .topbar,
+.wellbeing-page .wellbeing-card,
+.wellbeing-page .wellbeing-note {
+  background: rgba(255, 255, 255, 0.94);
+  border-color: #d6e5da;
+  box-shadow: 0 8px 24px rgba(24, 53, 45, 0.08);
+  backdrop-filter: none;
+}
+
+.wellbeing-page .nav-links a {
+  color: #58746a;
+}
+
+.wellbeing-page .nav-links a[aria-current='page'],
+.wellbeing-page .nav-links a:hover {
+  color: #1a6b50;
+}
+
+.wellbeing-page .theme-toggle {
+  background: #f4faf5;
+}
+
+.wellbeing-page .wellbeing-container {
+  max-width: 1060px;
+}
+
+.wellbeing-hero {
+  margin: 36px 0 24px;
+  padding: clamp(24px, 5vw, 48px);
+  border-radius: 26px;
+  background: #dcefe2;
+  color: #1b4637;
+}
+
+.wellbeing-hero h1 {
+  max-width: 720px;
+  margin: 0 0 12px;
+  font-size: clamp(2.1rem, 5vw, 3.5rem);
+  line-height: 1.08;
+}
+
+.wellbeing-hero > p:last-child {
+  max-width: 720px;
+  margin: 0;
+  color: #456b5a;
+  font-size: 1.05rem;
+  line-height: 1.7;
+}
+
+.wellbeing-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 20px;
+}
+
+.wellbeing-card {
+  padding: clamp(20px, 3vw, 28px);
+  border: 1px solid #d6e5da;
+  border-radius: 20px;
+}
+
+.wellbeing-card h2 {
+  margin: 5px 0 10px;
+  color: #1b4637;
+  font-size: 1.55rem;
+}
+
+.wellbeing-card > p:not(.eyebrow):not(.wellbeing-feedback):not(.wellbeing-timer) {
+  color: #526a5e;
+  line-height: 1.65;
+}
+
+.wellbeing-icon {
+  display: inline-grid;
+  width: 48px;
+  height: 48px;
+  place-items: center;
+  border-radius: 14px;
+  background: #e6f4ea;
+  font-size: 1.6rem;
+}
+
+.wellbeing-page .eyebrow {
+  color: #418164;
+  font-weight: 800;
+}
+
+.breathing-guide {
+  display: grid;
+  justify-items: center;
+  gap: 10px;
+  margin: 22px 0;
+  text-align: center;
+}
+
+.breathing-circle {
+  display: grid;
+  width: 142px;
+  aspect-ratio: 1;
+  place-items: center;
+  border: 3px solid #84b99a;
+  border-radius: 50%;
+  background: #edf8ef;
+  color: #235a43;
+  font-weight: 800;
+  transition: transform 4s ease-in-out, background-color 4s ease-in-out;
+}
+
+.breathing-circle.breathing-in {
+  transform: scale(1.12);
+  background: #d9f0df;
+}
+
+.breathing-circle.breathing-out {
+  transform: scale(0.94);
+  background: #edf8ef;
+}
+
+.breathing-guide > p {
+  margin: 0;
+  color: #58746a;
+  line-height: 1.5;
+}
+
+.wellbeing-timer {
+  color: #1b6547 !important;
+  font-variant-numeric: tabular-nums;
+  font-weight: 800;
+}
+
+.wellbeing-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+
+.wellbeing-button,
+.urge-prompt {
+  min-height: 44px;
+  padding: 10px 14px;
+  border: 1px solid #34775a;
+  border-radius: 11px;
+  background: #28734f;
+  color: #fff;
+  font: inherit;
+  font-weight: 700;
+  cursor: pointer;
+  transition: transform 160ms ease, background-color 160ms ease;
+}
+
+.wellbeing-button:hover:not(:disabled),
+.urge-prompt:hover {
+  transform: translateY(-2px);
+  background: #1d6041;
+}
+
+.wellbeing-button.secondary {
+  border-color: #c5d8ca;
+  background: #f2f8f3;
+  color: #285b43;
+}
+
+.wellbeing-button:disabled {
+  cursor: not-allowed;
+  opacity: 0.65;
+}
+
+.grounding-list {
+  display: grid;
+  gap: 9px;
+  margin: 18px 0;
+  padding: 0;
+  list-style: none;
+}
+
+.grounding-list li {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  min-height: 48px;
+  padding: 8px 12px;
+  border: 1px solid #e0e9e1;
+  border-radius: 11px;
+  color: #526a5e;
+  cursor: pointer;
+}
+
+.grounding-list li:focus-visible {
+  outline: 3px solid #5e9e78;
+  outline-offset: 2px;
+}
+
+.grounding-list li strong {
+  display: grid;
+  width: 30px;
+  height: 30px;
+  flex: 0 0 auto;
+  place-items: center;
+  border-radius: 50%;
+  background: #e6f4ea;
+  color: #286548;
+}
+
+.grounding-list li.completed {
+  border-color: #80b693;
+  background: #eef8ef;
+  color: #285b43;
+}
+
+.grounding-list li.completed strong {
+  background: #28734f;
+  color: #fff;
+}
+
+.wellbeing-feedback {
+  min-height: 2.8em;
+  margin: 12px 0;
+  color: #456b5a;
+  line-height: 1.5;
+}
+
+.urge-card {
+  grid-column: 1 / -1;
+}
+
+.urge-label {
+  display: block;
+  margin: 16px 0 8px;
+  color: #315e49;
+  font-weight: 700;
+}
+
+.urge-slider {
+  width: 100%;
+  accent-color: #28734f;
+}
+
+.urge-value {
+  display: block;
+  margin: 6px 0 14px;
+  color: #1b6547;
+  font-size: 1.35rem;
+  font-weight: 800;
+}
+
+.urge-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 9px;
+}
+
+.urge-prompt {
+  border-color: #c8dfcf;
+  background: #edf8ef;
+  color: #285b43;
+}
+
+.urge-prompt:hover {
+  background: #dcefe2;
+}
+
+.wellbeing-note {
+  margin: 22px 0 40px;
+  padding: 22px;
+  border: 1px solid #d6e5da;
+  border-radius: 18px;
+  line-height: 1.6;
+}
+
+.wellbeing-note > p {
+  margin: 8px 0;
+  color: #526a5e;
+}
+
+.wellbeing-note a {
+  color: #1b6547;
+  font-weight: 800;
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
+
+body[data-theme='dark'].wellbeing-page {
+  background-color: #14211b;
+  background-image: radial-gradient(circle at 10% 10%, #21382c, transparent 32%);
+  color: #e4eee7;
+}
+
+body[data-theme='dark'].wellbeing-page .topbar,
+body[data-theme='dark'].wellbeing-page .wellbeing-card,
+body[data-theme='dark'].wellbeing-page .wellbeing-note {
+  background: #1c2c23;
+  border-color: #395544;
+  color: #e4eee7;
+}
+
+body[data-theme='dark'].wellbeing-page .nav-links a,
+body[data-theme='dark'].wellbeing-page .wellbeing-card > p:not(.eyebrow):not(.wellbeing-feedback):not(.wellbeing-timer),
+body[data-theme='dark'].wellbeing-page .wellbeing-feedback,
+body[data-theme='dark'].wellbeing-page .wellbeing-note > p {
+  color: #bdd0c2;
+}
+
+body[data-theme='dark'].wellbeing-page .nav-links a[aria-current='page'],
+body[data-theme='dark'].wellbeing-page .nav-links a:hover,
+body[data-theme='dark'].wellbeing-page .wellbeing-note a {
+  color: #a7e0b8;
+}
+
+body[data-theme='dark'].wellbeing-page .theme-toggle {
+  background: #263a2e;
+  color: #e4eee7;
+}
+
+body[data-theme='dark'].wellbeing-page .wellbeing-hero {
+  background: #294535;
+  color: #eff8f1;
+}
+
+body[data-theme='dark'].wellbeing-page .wellbeing-hero > p:last-child,
+body[data-theme='dark'].wellbeing-page .eyebrow,
+body[data-theme='dark'].wellbeing-page .wellbeing-card h2,
+body[data-theme='dark'].wellbeing-page .urge-label {
+  color: #d6ebdc;
+}
+
+body[data-theme='dark'].wellbeing-page .wellbeing-icon,
+body[data-theme='dark'].wellbeing-page .grounding-list li strong,
+body[data-theme='dark'].wellbeing-page .urge-prompt,
+body[data-theme='dark'].wellbeing-page .wellbeing-button.secondary {
+  background: #2b4535;
+  color: #d7f0de;
+}
+
+body[data-theme='dark'].wellbeing-page .grounding-list li {
+  border-color: #395544;
+  color: #bdd0c2;
+}
+
+body[data-theme='dark'].wellbeing-page .grounding-list li.completed {
+  background: #294535;
+  color: #e4eee7;
+}
+
+body[data-theme='dark'].wellbeing-page .breathing-circle {
+  border-color: #76b78d;
+  background: #263a2e;
+  color: #d7f0de;
+}
+
+body[data-theme='dark'].wellbeing-page .breathing-circle.breathing-in {
+  background: #345940;
+}
+
+body[data-theme='dark'].wellbeing-page .breathing-circle.breathing-out {
+  background: #263a2e;
+}
+
+body[data-theme='dark'].wellbeing-page .breathing-guide > p,
+body[data-theme='dark'].wellbeing-page .wellbeing-timer,
+body[data-theme='dark'].wellbeing-page .urge-value {
+  color: #a7e0b8 !important;
+}
+
 .games-page .game-card-reaction { border-top: 7px solid #ff9f1c !important; }
 .games-page .game-card-math { border-top: 7px solid #70e000 !important; }
 .games-page .game-card-chess {
@@ -1434,6 +1803,14 @@ body[data-theme='light'].games-page .xp-panel {
 
   .profile-greeting {
     text-align: center;
+  }
+
+  .wellbeing-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .urge-card {
+    grid-column: auto;
   }
 }
 

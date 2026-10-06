@@ -10,6 +10,8 @@ npm start
 
 Sem `DATABASE_URL`, o servidor usa SQLite local em `data/surveys.sqlite`. Abra <http://127.0.0.1:3000>. A página de pesquisa precisa ser aberta pelo servidor; abrir o HTML como arquivo não conecta à API.
 
+A aba **Exercícios** oferece práticas guiadas de respiração confortável, aterramento sensorial e uma pausa para lidar com a vontade de fumar. As atividades são opcionais, podem ser interrompidas a qualquer momento e não substituem orientação profissional.
+
 ## Códigos individuais da pesquisa
 
 Na primeira visita à pesquisa, o servidor cria automaticamente um código aleatório para o navegador e a página o mostra para a pessoa guardar. O código fica salvo no navegador e é usado ao enviar a pesquisa; não é necessário digitá-lo. O banco guarda apenas os hashes do código e do identificador do navegador. Um navegador só pode registrar um código; cada código só pode enviar uma pesquisa. O banco impõe as regras mesmo se duas tentativas forem feitas ao mesmo tempo.
