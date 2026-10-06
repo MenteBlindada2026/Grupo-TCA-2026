@@ -435,7 +435,7 @@ h1, h2, h3, h4, p { margin-top: 0; }
 
 .calendar-grid {
   display: grid;
-  grid-template-columns: repeat(7, minmax(44px, 1fr));
+  grid-template-columns: repeat(7, minmax(0, 1fr));
   gap: 8px;
   margin-top: 12px;
 }
@@ -678,8 +678,12 @@ h1, h2, h3, h4, p { margin-top: 0; }
 }
 
 @media (max-width: 860px) {
-  .hero, .calendar-layout, .games-layout, .caps-layout, .feature-grid {
+  .hero, .calendar-layout, .games-layout, .caps-layout {
     grid-template-columns: 1fr;
+  }
+
+  .feature-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
   }
 
   .topbar {
@@ -695,6 +699,10 @@ h1, h2, h3, h4, p { margin-top: 0; }
 @media (max-width: 520px) {
   .container {
     width: min(100% - 20px, 1120px);
+  }
+
+  .feature-grid {
+    grid-template-columns: 1fr;
   }
 
   .topbar {
@@ -1787,6 +1795,84 @@ body[data-theme='light'].games-page .xp-panel {
 }
 
 @media (max-width: 600px) {
+  .topbar {
+    gap: 10px;
+  }
+
+  .brand-wrap {
+    justify-content: center;
+    width: 100%;
+  }
+
+  .nav-links {
+    width: 100%;
+    flex-wrap: nowrap;
+    justify-content: flex-start;
+    gap: 6px;
+    overflow-x: auto;
+    padding: 2px 2px 8px;
+    scrollbar-width: thin;
+    -webkit-overflow-scrolling: touch;
+  }
+
+  .nav-links a {
+    display: inline-flex;
+    min-height: 44px;
+    flex: 0 0 auto;
+    align-items: center;
+    padding: 8px 10px;
+    white-space: nowrap;
+  }
+
+  .theme-toggle,
+  .sign-out {
+    min-height: 44px;
+  }
+
+  .profile-greeting {
+    display: inline-flex;
+    min-height: 44px;
+    align-items: center;
+  }
+
+  .calendar-grid {
+    gap: 4px;
+  }
+
+  .day-name,
+  .calendar-day {
+    min-height: 44px;
+    border-radius: 9px;
+  }
+
+  .calendar-day.has-checkin::after {
+    right: 4px;
+    top: 4px;
+    width: 6px;
+    height: 6px;
+  }
+
+  .hero-actions {
+    display: grid;
+    grid-template-columns: 1fr;
+  }
+
+  .hero-actions > a,
+  .assessment-form > .primary-btn,
+  .access-card > .primary-btn {
+    width: 100%;
+    min-height: 48px;
+    text-align: center;
+  }
+
+  .access-gate {
+    padding: 12px;
+  }
+
+  .access-card {
+    padding: 22px 18px;
+  }
+
   .arcade-hero {
     align-items: flex-start;
   }
